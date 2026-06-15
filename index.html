@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="NutriVerse — discover healthy meals, nutrition products, personalized diet plans and fitness-oriented food recommendations." />
+  <title>NutriVerse · Eat Smart. Live Strong.</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js"
+    }
+  }
+  </script>
+</head>
+<body>
+  <!-- 3D hero canvas -->
+  <canvas id="bg-canvas" aria-hidden="true"></canvas>
+  <div class="grain" aria-hidden="true"></div>
+
+  <!-- NAV -->
+  <header class="nav" id="nav">
+    <a class="brand" href="#top" aria-label="NutriVerse home">
+      <span class="brand-mark">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none"><path d="M12 21c5-3.5 8-7 8-11a5 5 0 0 0-9-3 5 5 0 0 0-9 3c0 4 3 7.5 8 11l1 .6.9-.6Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M12 7v6m-3-3h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </span>
+      <span class="brand-name">Nutri<span>Verse</span></span>
+    </a>
+
+    <nav class="nav-links" aria-label="Primary">
+      <a href="#discover">Discover</a>
+      <a href="#plans">Diet Plans</a>
+      <a href="#products">Products</a>
+      <a href="#how">How it works</a>
+    </nav>
+
+    <div class="nav-actions">
+      <button class="btn btn-ghost" type="button">Sign in</button>
+      <button class="btn btn-primary" type="button">Get started</button>
+    </div>
+    <button class="nav-burger" id="burger" aria-label="Open menu" type="button"><span></span><span></span></button>
+  </header>
+
+  <main id="top">
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-inner reveal">
+        <span class="eyebrow"><i class="dot"></i> AI-powered nutrition discovery</span>
+        <h1 class="hero-title">
+          Eat smart.<br /><span class="grad">Live strong.</span>
+        </h1>
+        <p class="hero-sub">
+          Discover healthy meals, clean nutrition products, and diet plans tuned to
+          your goals — with fitness-oriented food recommendations that actually fit your life.
+        </p>
+
+        <form class="search" id="search" role="search" onsubmit="return false">
+          <span class="search-ico">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/><path d="m20 20-3-3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          </span>
+          <input id="search-input" type="text" placeholder="Try “high-protein breakfast under 400 kcal”…" aria-label="Search meals and products" />
+          <button class="btn btn-primary search-btn" type="submit">Search</button>
+        </form>
+
+        <div class="chips" id="chips">
+          <button class="chip" type="button">Vegan</button>
+          <button class="chip" type="button">Keto</button>
+          <button class="chip" type="button">High-protein</button>
+          <button class="chip" type="button">Low-carb</button>
+          <button class="chip" type="button">Gluten-free</button>
+          <button class="chip" type="button">Post-workout</button>
+        </div>
+
+        <div class="hero-stats">
+          <div><strong data-count="12000">0</strong><span>Healthy recipes</span></div>
+          <div><strong data-count="850">0</strong><span>Vetted products</span></div>
+          <div><strong data-count="98">0</strong><span>% goal match</span></div>
+        </div>
+      </div>
+
+      <div class="scroll-cue" aria-hidden="true"><span></span>Scroll to explore</div>
+    </section>
+
+    <!-- CATEGORIES -->
+    <section class="section" id="discover">
+      <div class="section-head reveal">
+        <h2>Discover by category</h2>
+        <p>Four pillars of a stronger you — all in one place.</p>
+      </div>
+      <div class="cats">
+        <article class="cat reveal" style="--i:0">
+          <div class="cat-glow"></div>
+          <span class="cat-emoji">🥗</span>
+          <h3>Healthy Meals</h3>
+          <p>Chef-designed recipes balanced for macros, taste and prep time.</p>
+          <a class="link-arrow" href="#discover">Explore meals →</a>
+        </article>
+        <article class="cat reveal" style="--i:1">
+          <div class="cat-glow"></div>
+          <span class="cat-emoji">💊</span>
+          <h3>Nutrition Products</h3>
+          <p>Lab-vetted supplements, proteins and superfoods you can trust.</p>
+          <a class="link-arrow" href="#products">Shop products →</a>
+        </article>
+        <article class="cat reveal" style="--i:2">
+          <div class="cat-glow"></div>
+          <span class="cat-emoji">📋</span>
+          <h3>Diet Plans</h3>
+          <p>Personalized weekly plans that adapt as your body changes.</p>
+          <a class="link-arrow" href="#plans">Build a plan →</a>
+        </article>
+        <article class="cat reveal" style="--i:3">
+          <div class="cat-glow"></div>
+          <span class="cat-emoji">🏋️</span>
+          <h3>Fitness Foods</h3>
+          <p>Pre &amp; post-workout fuel matched to your training intensity.</p>
+          <a class="link-arrow" href="#discover">Get recommendations →</a>
+        </article>
+      </div>
+    </section>
+
+    <!-- MEAL DISCOVERY GRID -->
+    <section class="section" id="meals">
+      <div class="section-head reveal">
+        <h2>Recommended for you</h2>
+        <p>Curated picks based on a fitness-first, balanced-macros profile.</p>
+      </div>
+
+      <div class="filters reveal" id="filters">
+        <button class="filter is-active" data-filter="all" type="button">All</button>
+        <button class="filter" data-filter="breakfast" type="button">Breakfast</button>
+        <button class="filter" data-filter="lunch" type="button">Lunch</button>
+        <button class="filter" data-filter="dinner" type="button">Dinner</button>
+        <button class="filter" data-filter="snack" type="button">Snacks</button>
+      </div>
+
+      <div class="grid" id="meal-grid"><!-- cards injected by app.js --></div>
+    </section>
+
+    <!-- DIET PLANS -->
+    <section class="section" id="plans">
+      <div class="section-head reveal">
+        <h2>Plans that move with you</h2>
+        <p>Pick a goal. We handle the macros, the variety and the grocery list.</p>
+      </div>
+      <div class="plans">
+        <article class="plan reveal">
+          <span class="plan-tag">Lean</span>
+          <h3>Cut &amp; Define</h3>
+          <p class="plan-kcal">1,600–1,800 kcal/day</p>
+          <ul>
+            <li>High-protein, moderate carb</li>
+            <li>5 meals · auto grocery list</li>
+            <li>Weekly progress check-ins</li>
+          </ul>
+          <button class="btn btn-outline" type="button">Choose plan</button>
+        </article>
+        <article class="plan plan-featured reveal">
+          <span class="plan-badge">Most popular</span>
+          <span class="plan-tag">Balanced</span>
+          <h3>Strong &amp; Steady</h3>
+          <p class="plan-kcal">2,000–2,300 kcal/day</p>
+          <ul>
+            <li>Performance-tuned macros</li>
+            <li>Pre/post-workout timing</li>
+            <li>Smart swaps &amp; cheat-day logic</li>
+          </ul>
+          <button class="btn btn-primary" type="button">Choose plan</button>
+        </article>
+        <article class="plan reveal">
+          <span class="plan-tag">Build</span>
+          <h3>Bulk &amp; Power</h3>
+          <p class="plan-kcal">2,600–3,000 kcal/day</p>
+          <ul>
+            <li>Calorie-surplus, clean sources</li>
+            <li>Strength-focused fueling</li>
+            <li>Supplement stack guidance</li>
+          </ul>
+          <button class="btn btn-outline" type="button">Choose plan</button>
+        </article>
+      </div>
+    </section>
+
+    <!-- PRODUCTS -->
+    <section class="section" id="products">
+      <div class="section-head reveal">
+        <h2>Nutrition products, vetted</h2>
+        <p>Third-party tested. No fillers. No hype.</p>
+      </div>
+      <div class="products" id="product-row"><!-- injected --></div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section class="section" id="how">
+      <div class="section-head reveal">
+        <h2>How NutriVerse works</h2>
+        <p>From goal to plate in three simple steps.</p>
+      </div>
+      <div class="steps">
+        <div class="step reveal"><span class="step-n">01</span><h3>Tell us your goal</h3><p>Cut, maintain or build — plus diet style and allergies.</p></div>
+        <div class="step-line" aria-hidden="true"></div>
+        <div class="step reveal"><span class="step-n">02</span><h3>Get matched</h3><p>Our engine ranks meals &amp; products to your macros and taste.</p></div>
+        <div class="step-line" aria-hidden="true"></div>
+        <div class="step reveal"><span class="step-n">03</span><h3>Track &amp; adapt</h3><p>Your plan evolves weekly with your progress and feedback.</p></div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta reveal">
+      <div class="cta-card">
+        <h2>Your strongest self starts on the plate.</h2>
+        <p>Join 200k+ people discovering food that works as hard as they do.</p>
+        <form class="cta-form" onsubmit="return false">
+          <input type="email" placeholder="you@email.com" aria-label="Email" />
+          <button class="btn btn-primary" type="submit">Start free</button>
+        </form>
+        <small>No card required · Cancel anytime</small>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <span class="brand-name">Nutri<span>Verse</span></span>
+        <p>Eat smart. Live strong.</p>
+      </div>
+      <div><h4>Platform</h4><a href="#discover">Discover</a><a href="#plans">Diet Plans</a><a href="#products">Products</a></div>
+      <div><h4>Company</h4><a href="#">About</a><a href="#">Careers</a><a href="#">Blog</a></div>
+      <div><h4>Support</h4><a href="#">Help center</a><a href="#">Contact</a><a href="#">Privacy</a></div>
+    </div>
+    <div class="footer-bottom">© 2026 NutriVerse. Crafted for healthier humans.</div>
+  </footer>
+
+  <script type="module" src="js/scene.js"></script>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
