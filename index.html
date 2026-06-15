@@ -20,6 +20,11 @@
 <body>
   <!-- 3D hero canvas -->
   <canvas id="bg-canvas" aria-hidden="true"></canvas>
+  <!-- colourful aurora glows -->
+  <div class="aurora" aria-hidden="true">
+    <span class="blob b1"></span><span class="blob b2"></span>
+    <span class="blob b3"></span><span class="blob b4"></span>
+  </div>
   <div class="grain" aria-hidden="true"></div>
 
   <!-- NAV -->
@@ -35,6 +40,7 @@
       <a href="#discover">Discover</a>
       <a href="#plans">Diet Plans</a>
       <a href="#products">Products</a>
+      <a href="#calculator">AI Coach</a>
       <a href="#how">How it works</a>
     </nav>
 
@@ -209,6 +215,48 @@
       </div>
     </section>
 
+    <!-- AI MACRO CALCULATOR -->
+    <section class="section" id="calculator">
+      <div class="section-head reveal">
+        <span class="eyebrow" style="margin-bottom:1rem"><i class="dot"></i> Powered by NutriAI</span>
+        <h2>AI Macro Calculator</h2>
+        <p>Get personalized calorie &amp; macro targets, then let AI build the meals around them.</p>
+      </div>
+      <div class="calc reveal">
+        <form class="calc-form" id="calc-form">
+          <div class="calc-grid">
+            <label>Age<input type="number" id="c-age" min="14" max="100" value="28" required /></label>
+            <label>Sex<select id="c-sex"><option value="male">Male</option><option value="female">Female</option></select></label>
+            <label>Weight (kg)<input type="number" id="c-weight" min="30" max="250" value="72" required /></label>
+            <label>Height (cm)<input type="number" id="c-height" min="120" max="230" value="175" required /></label>
+            <label>Activity<select id="c-activity">
+              <option value="1.2">Sedentary</option>
+              <option value="1.375">Light · 1–3 d/wk</option>
+              <option value="1.55" selected>Moderate · 3–5 d/wk</option>
+              <option value="1.725">Active · 6–7 d/wk</option>
+              <option value="1.9">Athlete</option>
+            </select></label>
+            <label>Goal<select id="c-goal">
+              <option value="-0.2">Lose fat</option>
+              <option value="0" selected>Maintain</option>
+              <option value="0.15">Build muscle</option>
+            </select></label>
+          </div>
+          <button class="btn btn-primary" type="submit">Calculate my targets</button>
+        </form>
+        <div class="calc-result" id="calc-result" hidden>
+          <div class="calc-cal"><span>Daily target</span><strong id="r-cal">0</strong><small>kcal / day</small></div>
+          <div class="calc-macros">
+            <div class="cm" style="--c:var(--cyan)"><b id="r-p">0g</b><span>Protein</span><i id="r-pp">0%</i></div>
+            <div class="cm" style="--c:var(--amber)"><b id="r-c">0g</b><span>Carbs</span><i id="r-cp">0%</i></div>
+            <div class="cm" style="--c:var(--pink)"><b id="r-f">0g</b><span>Fats</span><i id="r-fp">0%</i></div>
+          </div>
+          <p class="calc-note" id="r-note"></p>
+          <button class="btn btn-outline" id="r-ai" type="button">✨ Ask AI to plan my meals</button>
+        </div>
+      </div>
+    </section>
+
     <!-- CTA -->
     <section class="cta reveal">
       <div class="cta-card">
@@ -236,6 +284,38 @@
     <div class="footer-bottom">© 2026 NutriVerse. Crafted for healthier humans.</div>
   </footer>
 
+  <!-- AI ASSISTANT -->
+  <button class="ai-fab" id="ai-fab" type="button" aria-label="Open NutriAI assistant">
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none"><path d="m12 3 1.8 4.7L18.5 9l-3.8 2.3L13 16l-1-4.7L8 9l4.2-1.3L12 3Z" fill="currentColor"/><circle cx="18.5" cy="17.5" r="2.2" fill="currentColor"/><circle cx="5.5" cy="6.5" r="1.5" fill="currentColor"/></svg>
+    <span>Ask AI</span>
+  </button>
+
+  <div class="ai-panel" id="ai-panel" aria-hidden="true" role="dialog" aria-label="NutriAI chat">
+    <header class="ai-head">
+      <div class="ai-id"><span class="ai-orb"></span><div><strong>NutriAI</strong><small>Your nutrition copilot</small></div></div>
+      <button class="ai-close" id="ai-close" type="button" aria-label="Close">✕</button>
+    </header>
+    <div class="ai-msgs" id="ai-msgs"></div>
+    <div class="ai-quick" id="ai-quick">
+      <button type="button">High-protein breakfast</button>
+      <button type="button">Vegan lunch ideas</button>
+      <button type="button">Post-workout snack</button>
+      <button type="button">Help me lose fat</button>
+    </div>
+    <form class="ai-input" id="ai-form">
+      <input id="ai-text" type="text" placeholder="Ask about meals, macros, diets…" autocomplete="off" />
+      <button class="btn btn-primary" type="submit" aria-label="Send">➤</button>
+    </form>
+  </div>
+
+  <!-- MEAL DETAIL MODAL -->
+  <div class="modal" id="meal-modal" aria-hidden="true">
+    <div class="modal-back" data-close></div>
+    <div class="modal-card" id="modal-card" role="dialog" aria-label="Meal details"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
   <script type="module" src="js/scene.js"></script>
   <script type="module" src="js/app.js"></script>
 </body>

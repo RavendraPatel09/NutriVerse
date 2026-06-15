@@ -16,10 +16,15 @@ const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true 
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 renderer.setSize(innerWidth, innerHeight);
 
-// ---- palette ----
+// ---- colourful palette ----
 const LIME = new THREE.Color('#9cff57');
 const EMERALD = new THREE.Color('#27e08a');
 const MINT = new THREE.Color('#5ff0c8');
+const CYAN = new THREE.Color('#22d3ee');
+const VIOLET = new THREE.Color('#a78bfa');
+const PINK = new THREE.Color('#f871c8');
+const AMBER = new THREE.Color('#ffd166');
+const PALETTE = [LIME, EMERALD, MINT, CYAN, VIOLET, PINK, AMBER];
 
 // ---- lights ----
 scene.add(new THREE.AmbientLight(0x88ffcc, 0.6));
@@ -54,8 +59,8 @@ const basePos = coreGeo.attributes.position.array.slice();
 // ---- orbiting macro nodes ----
 const nodes = new THREE.Group();
 scene.add(nodes);
-const nodeColors = [LIME, EMERALD, MINT, LIME, MINT];
-for (let i = 0; i < 5; i++) {
+const nodeColors = [LIME, CYAN, VIOLET, PINK, AMBER, EMERALD, MINT];
+for (let i = 0; i < 7; i++) {
   const m = new THREE.Mesh(
     new THREE.SphereGeometry(0.16 + Math.random() * 0.12, 16, 16),
     new THREE.MeshStandardMaterial({
@@ -83,7 +88,7 @@ for (let i = 0; i < COUNT; i++) {
   positions[i * 3] = r * Math.sin(p) * Math.cos(t);
   positions[i * 3 + 1] = r * Math.sin(p) * Math.sin(t) * 0.6;
   positions[i * 3 + 2] = r * Math.cos(p);
-  const c = [LIME, EMERALD, MINT][i % 3];
+  const c = PALETTE[i % PALETTE.length];
   colors[i * 3] = c.r; colors[i * 3 + 1] = c.g; colors[i * 3 + 2] = c.b;
 }
 pGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
@@ -123,22 +128,71 @@ addEventListener('resize', () => {
   renderer.setSize(innerWidth, innerHeight);
 });
 
+// ---- background reacts to nav / UI hover ----
+const energy = { v: 0, target: 0 };
+const tint = new THREE.Color('#27e08a');
+const tintTarget = new THREE.Color('#27e08a');
+const baseKey = new THREE.Color('#9cff57');
+const baseRim = new THREE.Color('#27e08a');
+const baseEmissive = new THREE.Color('#0f3a28');
+const HOVER_COLORS = {
+  home: '#9cff57', discover: '#22d3ee', plans: '#a78bfa',
+  products: '#ffd166', how: '#f871c8', default: '#27e08a',
+};
+function bindHover() {
+  const map = [
+    ['.brand', 'home'], ['a[href="#discover"]', 'discover'], ['a[href="#plans"]', 'plans'],
+    ['a[href="#products"]', 'products'], ['a[href="#calculator"]', 'plans'], ['a[href="#how"]', 'how'],
+    ['.nav-actions .btn', 'home'], ['.ai-fab', 'discover'],
+    ['.cat:nth-child(1)', 'home'], ['.cat:nth-child(2)', 'discover'],
+    ['.cat:nth-child(3)', 'plans'], ['.cat:nth-child(4)', 'products'],
+  ];
+  map.forEach(([sel, key]) => document.querySelectorAll(sel).forEach(el => {
+    el.addEventListener('pointerenter', () => {
+      energy.target = 1;
+      tintTarget.set(HOVER_COLORS[key] || HOVER_COLORS.default);
+      document.body.classList.add('bg-active');
+    });
+    el.addEventListener('pointerleave', () => {
+      energy.target = 0;
+      document.body.classList.remove('bg-active');
+    });
+  }));
+}
+bindHover();
+
 // ---- animation loop ----
 const clock = new THREE.Clock();
 function animate() {
   const t = clock.getElapsedTime();
 
-  // smooth parallax
-  mouse.x += (mouse.tx - mouse.x) * 0.05;
-  mouse.y += (mouse.ty - mouse.y) * 0.05;
-  camera.position.x += (mouse.x * 3 - camera.position.x) * 0.05;
-  camera.position.y += (-mouse.y * 2 - camera.position.y) * 0.05;
+  // snappy, responsive parallax (higher easing = tracks the cursor faster)
+  mouse.x += (mouse.tx - mouse.x) * 0.18;
+  mouse.y += (mouse.ty - mouse.y) * 0.18;
+  camera.position.x += (mouse.x * 4.2 - camera.position.x) * 0.12;
+  camera.position.y += (-mouse.y * 3 - camera.position.y) * 0.12;
   camera.lookAt(0, 0, 0);
 
-  // core breathing / rotation
+  // hover reactivity: ease energy + colour, then drive the whole scene
+  energy.v += (energy.target - energy.v) * 0.08;
+  tint.lerp(tintTarget, 0.07);
+  const e = energy.v;
+  key.color.copy(baseKey).lerp(tint, e);
+  rim.color.copy(baseRim).lerp(tint, e);
+  key.intensity = 60 + e * 55;
+  rim.intensity = 40 + e * 55;
+  coreMat.emissiveIntensity = 0.6 + e * 1.6;
+  coreMat.emissive.copy(baseEmissive).lerp(tint, e * 0.7);
+  wire.material.opacity = 0.35 + e * 0.45;
+  wire.material.color.copy(EMERALD).lerp(tint, e);
+  particles.material.size = 0.14 + e * 0.07;
+  particles.material.opacity = 0.85 + e * 0.15;
+  coreGroup.scale.setScalar(1 + e * 0.07);
+
+  // core breathing / rotation — also leans toward the cursor
   if (!reduceMotion) {
-    coreGroup.rotation.y = t * 0.18;
-    coreGroup.rotation.x = Math.sin(t * 0.25) * 0.25;
+    coreGroup.rotation.y = t * 0.18 + mouse.x * 0.6;
+    coreGroup.rotation.x = Math.sin(t * 0.25) * 0.25 + mouse.y * 0.5;
     const pos = coreGeo.attributes.position;
     for (let i = 0; i < pos.count; i++) {
       const ix = i * 3;
@@ -163,8 +217,8 @@ function animate() {
     m.scale.setScalar(s);
   });
 
-  // particle drift + scroll pull
-  particles.rotation.y = t * 0.02 + scrollY * 0.0002;
+  // particle drift + scroll pull (+ extra spin on hover)
+  particles.rotation.y = t * (0.02 + energy.v * 0.06) + scrollY * 0.0002;
   particles.rotation.x = scrollY * 0.0001;
 
   renderer.render(scene, camera);
