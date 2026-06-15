@@ -324,6 +324,10 @@ body.bg-active .aurora .blob{opacity:.66}
 .msg .m-meal .e{font-size:1.4rem}
 .msg .m-meal b{font-size:.82rem;display:block}
 .msg .m-meal span{font-size:.72rem;color:var(--muted)}
+.diet-pick{display:flex;gap:.45rem;margin-top:.7rem;flex-wrap:wrap}
+.diet-pick button{font:inherit;font-size:.85rem;font-weight:500;color:var(--text);background:rgba(255,255,255,.05);
+  border:1px solid var(--stroke-strong);border-radius:12px;padding:.5rem .85rem;cursor:pointer;transition:all .2s}
+.diet-pick button:hover{background:var(--accent-grad);color:#04130b;border-color:transparent;transform:translateY(-2px)}
 .typing{display:flex;gap:4px;padding:.8rem .9rem;align-self:flex-start;background:rgba(255,255,255,.05);border:1px solid var(--stroke);border-radius:14px}
 .typing i{width:6px;height:6px;border-radius:50%;background:var(--mint);animation:blink 1.2s infinite}
 .typing i:nth-child(2){animation-delay:.2s}.typing i:nth-child(3){animation-delay:.4s}

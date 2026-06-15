@@ -2,15 +2,15 @@
 
 /* ---------- data ---------- */
 const MEALS = [
-  { name: 'Grilled Salmon Power Bowl', emoji: '🐟', img: 'salmon,bowl,rice',     cat: 'lunch',     tag: 'High-protein', kcal: 520, p: 42, c: 38, f: 18, rating: 4.9, time: 25 },
-  { name: 'Avocado Egg Toast',         emoji: '🥑', img: 'avocado,toast,egg',    cat: 'breakfast', tag: 'Keto-friendly', kcal: 340, p: 18, c: 22, f: 21, rating: 4.7, time: 10 },
-  { name: 'Mediterranean Chickpea Bowl', emoji: '🥙', img: 'chickpea,mediterranean,bowl', cat: 'lunch', tag: 'Vegan',  kcal: 410, p: 16, c: 58, f: 12, rating: 4.8, time: 20 },
-  { name: 'Greek Yogurt Berry Parfait',emoji: '🫐', img: 'yogurt,berries,parfait', cat: 'snack',   tag: 'Low-fat',      kcal: 210, p: 20, c: 26, f: 4,  rating: 4.6, time: 5  },
-  { name: 'Lean Chicken Stir-Fry',     emoji: '🍗', img: 'chicken,stirfry,vegetables', cat: 'dinner', tag: 'High-protein', kcal: 480, p: 45, c: 34, f: 14, rating: 4.9, time: 22 },
-  { name: 'Overnight Protein Oats',    emoji: '🥣', img: 'oats,porridge,bowl', cat: 'breakfast', tag: 'Post-workout', kcal: 380, p: 28, c: 48, f: 9,  rating: 4.8, time: 5  },
-  { name: 'Zucchini Turkey Boats',     emoji: '🥒', img: 'zucchini,stuffed,baked', cat: 'dinner',  tag: 'Low-carb',     kcal: 360, p: 38, c: 16, f: 17, rating: 4.5, time: 30 },
-  { name: 'Almond Energy Bites',       emoji: '🍫', img: 'energy,protein,balls', photo: 'https://images.unsplash.com/photo-1678554500191-3885a6fbf8c2?w=640&h=420&fit=crop&q=80', cat: 'snack', tag: 'Gluten-free',  kcal: 180, p: 8,  c: 18, f: 11, rating: 4.7, time: 8  },
-  { name: 'Sweet Potato Veggie Hash',  emoji: '🍠', img: 'sweet,potato,hash', cat: 'breakfast', tag: 'Vegan',    kcal: 300, p: 22, c: 18, f: 16, rating: 4.6, time: 12 },
+  { name: 'Grilled Salmon Power Bowl', emoji: '🐟', diet: 'nonveg', img: 'salmon,bowl,rice',     cat: 'lunch',     tag: 'High-protein', kcal: 520, p: 42, c: 38, f: 18, rating: 4.9, time: 25 },
+  { name: 'Avocado Egg Toast',         emoji: '🥑', diet: 'nonveg', img: 'avocado,toast,egg',    cat: 'breakfast', tag: 'Keto-friendly', kcal: 340, p: 18, c: 22, f: 21, rating: 4.7, time: 10 },
+  { name: 'Mediterranean Chickpea Bowl', emoji: '🥙', diet: 'veg', img: 'chickpea,mediterranean,bowl', cat: 'lunch', tag: 'Vegan',  kcal: 410, p: 16, c: 58, f: 12, rating: 4.8, time: 20 },
+  { name: 'Greek Yogurt Berry Parfait',emoji: '🫐', diet: 'veg', img: 'yogurt,berries,parfait', cat: 'snack',   tag: 'Low-fat',      kcal: 210, p: 20, c: 26, f: 4,  rating: 4.6, time: 5  },
+  { name: 'Lean Chicken Stir-Fry',     emoji: '🍗', diet: 'nonveg', img: 'chicken,stirfry,vegetables', cat: 'dinner', tag: 'High-protein', kcal: 480, p: 45, c: 34, f: 14, rating: 4.9, time: 22 },
+  { name: 'Overnight Protein Oats',    emoji: '🥣', diet: 'veg', img: 'oats,porridge,bowl', cat: 'breakfast', tag: 'Post-workout', kcal: 380, p: 28, c: 48, f: 9,  rating: 4.8, time: 5  },
+  { name: 'Zucchini Turkey Boats',     emoji: '🥒', diet: 'nonveg', img: 'zucchini,stuffed,baked', cat: 'dinner',  tag: 'Low-carb',     kcal: 360, p: 38, c: 16, f: 17, rating: 4.5, time: 30 },
+  { name: 'Almond Energy Bites',       emoji: '🍫', diet: 'veg', img: 'energy,protein,balls', photo: 'https://images.unsplash.com/photo-1678554500191-3885a6fbf8c2?w=640&h=420&fit=crop&q=80', cat: 'snack', tag: 'Gluten-free',  kcal: 180, p: 8,  c: 18, f: 11, rating: 4.7, time: 8  },
+  { name: 'Sweet Potato Veggie Hash',  emoji: '🍠', diet: 'veg', img: 'sweet,potato,hash', cat: 'breakfast', tag: 'Vegan',    kcal: 300, p: 22, c: 18, f: 16, rating: 4.6, time: 12 },
 ];
 
 // real food photo: a hand-picked `photo` URL wins; otherwise a keyword-matched
@@ -308,14 +308,40 @@ const aiMsgs = document.getElementById('ai-msgs');
 const aiForm = document.getElementById('ai-form');
 const aiText = document.getElementById('ai-text');
 let aiGreeted = false;
+let aiDiet = null; // 'veg' | 'nonveg' | 'mix'
+const DIET_LABEL = { veg: 'Vegetarian 🥦', nonveg: 'Non-veg 🍗', mix: 'Mixed 🥗' };
 
 function openAI() {
   aiPanel.classList.add('open'); aiPanel.setAttribute('aria-hidden', 'false');
   if (!aiGreeted) {
     aiGreeted = true;
-    botSay("Hey! I'm <b>NutriAI</b> 🥑 — tell me your goal, a diet style (vegan, keto, high-protein…) or a meal type, and I'll recommend foods from our kitchen. Pick a suggestion below 👇");
+    botSay("Hey! I'm <b>NutriAI</b> 🥑 — your nutrition copilot.");
+    setTimeout(askDiet, 450);
   }
   setTimeout(() => aiText.focus(), 320);
+}
+
+// ask the user what they eat, with inline choice buttons
+function askDiet() {
+  const node = botSay("First — <b>what do you eat?</b> I'll tailor every recommendation to it.");
+  const wrap = document.createElement('div');
+  wrap.className = 'diet-pick';
+  wrap.innerHTML = '<button data-d="veg">🥦 Veg</button><button data-d="nonveg">🍗 Non-veg</button><button data-d="mix">🥗 Mix</button>';
+  wrap.querySelectorAll('button').forEach(b => b.addEventListener('click', () => setDiet(b.dataset.d)));
+  node.appendChild(wrap);
+  aiScroll();
+}
+
+function setDiet(d) {
+  aiDiet = d;
+  document.querySelector('.ai-id small').textContent = DIET_LABEL[d] + ' · copilot';
+  userSay(DIET_LABEL[d]);
+  const typing = aiTyping();
+  setTimeout(() => {
+    typing.remove();
+    const word = d === 'veg' ? 'vegetarian 🥦' : d === 'nonveg' ? 'non-veg 🍗' : 'veg & non-veg 🥗';
+    botSay(`Perfect — I'll only suggest <b>${word}</b> options. Now tell me a goal or meal type, or tap a suggestion below 👇`);
+  }, 500);
 }
 function closeAI() { aiPanel.classList.remove('open'); aiPanel.setAttribute('aria-hidden', 'true'); }
 $('ai-fab').addEventListener('click', () => aiPanel.classList.contains('open') ? closeAI() : openAI());
@@ -331,6 +357,11 @@ function aiTyping() { const d = document.createElement('div'); d.className = 'ty
 // with a fetch() to the Claude API (model: claude-opus-4-8) on your backend.
 function aiThink(q) {
   const s = q.toLowerCase();
+  // detect / update diet preference from free text
+  if (/non[-\s]?veg|non[-\s]?vegetarian|nonveg/.test(s)) aiDiet = 'nonveg';
+  else if (/\bmix(ed)?\b|both veg|veg.*non[-\s]?veg/.test(s)) aiDiet = 'mix';
+  else if (/\bveg\b|vegetarian|veggie|plant/.test(s)) aiDiet = 'veg';
+
   const tagKeys = ['vegan', 'keto', 'low-carb', 'low carb', 'gluten', 'high-protein', 'protein', 'post-workout', 'post workout'];
   const wantTag = tagKeys.find(k => s.includes(k));
   const cats = ['breakfast', 'lunch', 'dinner', 'snack'];
@@ -339,23 +370,30 @@ function aiThink(q) {
   const gain = /(gain|bulk|muscle|mass|build|surplus|strong)/.test(s);
   const calo = /(calorie|macro|how many|tdee|bmr|kcal)/.test(s);
 
-  let pool = MEALS.slice();
-  if (wantTag) pool = pool.filter(m => m.tag.toLowerCase().includes(wantTag.replace(' ', '-')));
-  if (wantCat) pool = pool.filter(m => m.cat === wantCat);
+  // diet filter respected first (and on every fallback)
+  const dietFilter = arr => aiDiet === 'veg' ? arr.filter(m => m.diet === 'veg')
+    : aiDiet === 'nonveg' ? arr.filter(m => m.diet === 'nonveg') : arr;
+
+  let pool = dietFilter(MEALS.slice());
+  let narrowed = pool.slice();
+  if (wantTag) narrowed = narrowed.filter(m => m.tag.toLowerCase().includes(wantTag.replace(' ', '-')));
+  if (wantCat) narrowed = narrowed.filter(m => m.cat === wantCat);
+  pool = narrowed.length ? narrowed : pool;       // keep diet even if tag/cat over-narrows
   if (!pool.length) pool = MEALS.slice();
   if (lose) pool.sort((a, b) => a.kcal - b.kcal || b.p - a.p);
   else if (gain) pool.sort((a, b) => b.kcal - a.kcal);
   else pool.sort((a, b) => b.rating - a.rating);
   const picks = pool.slice(0, 3);
 
+  const dietWord = aiDiet === 'veg' ? 'veg ' : aiDiet === 'nonveg' ? 'non-veg ' : '';
   let intro;
   if (calo) intro = 'Great question! Use the <b>AI Macro Calculator</b> above for exact numbers. Meanwhile, here are balanced picks:';
-  else if (lose) intro = 'For fat loss, lean high-protein, lower-calorie meals keep you full. Try these:';
-  else if (gain) intro = 'To build muscle, go calorie-dense with strong protein. These work well:';
-  else if (wantTag && wantCat) intro = `Here are ${wantTag} ${wantCat} ideas:`;
-  else if (wantTag) intro = `Top ${wantTag} options coming up:`;
-  else if (wantCat) intro = `Great ${wantCat} picks for you:`;
-  else intro = "Here are some highly-rated meals I think you'll love:";
+  else if (lose) intro = `For fat loss, lean ${dietWord}high-protein, lower-calorie meals keep you full. Try these:`;
+  else if (gain) intro = `To build muscle, go calorie-dense ${dietWord}with strong protein. These work well:`;
+  else if (wantTag && wantCat) intro = `Here are ${dietWord}${wantTag} ${wantCat} ideas:`;
+  else if (wantTag) intro = `Top ${dietWord}${wantTag} options coming up:`;
+  else if (wantCat) intro = `Great ${dietWord}${wantCat} picks for you:`;
+  else intro = `Here are some highly-rated ${dietWord}meals I think you'll love:`;
   return { intro, picks };
 }
 
@@ -378,4 +416,8 @@ function aiAsk(text) {
 }
 
 aiForm.addEventListener('submit', e => { e.preventDefault(); const t = aiText.value.trim(); if (t) aiAsk(t); });
-$('ai-quick').addEventListener('click', e => { const b = e.target.closest('button'); if (b) aiAsk(b.textContent); });
+$('ai-quick').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  if (b.dataset.act === 'diet') { if (!aiPanel.classList.contains('open')) openAI(); askDiet(); return; }
+  aiAsk(b.textContent);
+});
