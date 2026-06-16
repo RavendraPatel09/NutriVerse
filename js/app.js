@@ -41,7 +41,7 @@ function mealCard(m) {
       <span class="ph">${m.emoji}</span>
       <img class="card-photo" src="${mealImg(m)}" alt="${m.name}" loading="lazy" onerror="this.remove()" />
       <span class="card-tag">${m.tag}</span>
-      <button class="card-fav" type="button" aria-label="Save">
+      <button class="card-fav${isFav(m.name) ? ' active' : ''}" type="button" aria-label="Save">
         <svg viewBox="0 0 24 24" width="18" height="18" fill="none"><path d="M12 20s-7-4.35-9.33-8.5C1.1 8.6 2.6 5.5 5.6 5.5c1.8 0 3 1 2.9 1 .9-1 2.1-1.6 3.5-1.6 3 0 4.5 3.1 2.9 6C18.9 15.65 12 20 12 20Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
       </button>
     </div>
@@ -60,8 +60,7 @@ function renderMeals(filter = 'all') {
   const list = filter === 'all' ? MEALS : MEALS.filter(m => m.cat === filter);
   grid.innerHTML = list.map(mealCard).join('');
   // re-bind fav buttons
-  grid.querySelectorAll('.card-fav').forEach(b =>
-    b.addEventListener('click', e => { e.stopPropagation(); b.classList.toggle('active'); }));
+  bindFavs();
   // stagger-reveal new cards
   grid.querySelectorAll('.card').forEach((c, i) => {
     c.style.opacity = 0; c.style.transform = 'translateY(20px)';
@@ -102,8 +101,7 @@ document.getElementById('search').addEventListener('submit', () => {
     m.name.toLowerCase().includes(q) || m.tag.toLowerCase().includes(q) || m.cat.includes(q));
   grid.innerHTML = list.length ? list.map(mealCard).join('')
     : `<p style="grid-column:1/-1;text-align:center;color:var(--muted)">No matches for “${q}”. Try a tag like “vegan” or “high-protein”.</p>`;
-  grid.querySelectorAll('.card-fav').forEach(b =>
-    b.addEventListener('click', e => { e.stopPropagation(); b.classList.toggle('active'); }));
+  bindFavs();
   document.getElementById('meals').scrollIntoView({ behavior: 'smooth' });
 });
 
@@ -240,11 +238,12 @@ function openMeal(m) {
       </div>
       <ul class="m-benefits">${mealBenefits(m).map(x => `<li>${x}</li>`).join('')}</ul>
       <div class="modal-actions">
-        <button class="btn btn-primary" type="button" data-close>Add to plan</button>
+        <button class="btn btn-primary" type="button" id="modal-add" data-close>Add to plan</button>
         <button class="btn btn-outline" type="button" id="modal-ai">✨ Ask AI about this</button>
       </div>
     </div>`;
   modal.classList.add('open'); modal.setAttribute('aria-hidden', 'false');
+  modalCard.querySelector('#modal-add').addEventListener('click', () => addToPlan(m.name));
   modalCard.querySelector('#modal-ai').addEventListener('click', () => {
     closeModal(); openAI(); aiAsk(`Tell me more about ${m.name} and when I should eat it`);
   });
@@ -403,6 +402,8 @@ function aiAsk(text) {
   const typing = aiTyping();
   setTimeout(() => {
     typing.remove();
+    const small = smallTalk(text.toLowerCase());
+    if (small) { botSay(small); return; }
     const { intro, picks } = aiThink(text);
     const cards = picks.map(m =>
       `<div class="m-meal" data-name="${esc(m.name)}"><span class="e">${m.emoji}</span>
@@ -421,3 +422,220 @@ $('ai-quick').addEventListener('click', e => {
   if (b.dataset.act === 'diet') { if (!aiPanel.classList.contains('open')) openAI(); askDiet(); return; }
   aiAsk(b.textContent);
 });
+
+/* extra conversational replies so NutriAI always responds, not just to meals */
+function smallTalk(s) {
+  if (/^\s*(hi+|hey+|hello+|yo|hiya|hola|sup|greetings|good\s(morning|afternoon|evening))[\s!.,]*$/.test(s))
+    return "Hey there! 👋 I'm <b>NutriAI</b>. Tell me a goal (lose fat, build muscle) or a meal type and I'll find the right food for you.";
+  if (/(thank|thanks|thx|^ty\b|appreciate|cheers)/.test(s))
+    return "You're welcome! 💚 Anything else I can help you plan?";
+  if (/(who are you|what are you|your name|about you|are you (real|human|ai|a bot)|chatgpt)/.test(s))
+    return "I'm <b>NutriAI</b> 🥑 — NutriVerse's nutrition copilot. I reason over our meal library to match food to your goals, diet and macros.";
+  if (/(how much water|water (intake|should|do i)|hydrat|drink water)/.test(s))
+    return "Aim for about <b>30–35 ml of water per kg</b> of body weight daily — a little more on training days. Sip steadily through the day. 💧";
+  if (/^\s*(help|what can you do|options|menu|what do you do|commands)[\s?!.]*$/.test(s))
+    return "I can 🍽️ suggest meals by goal or type, 🥦 filter veg / non-veg, and 📊 point you to the Macro Calculator above. Try “high-protein breakfast” or “help me lose fat”.";
+  if (/^\s*(bye|goodbye|see\s?ya|cya|that's all|thats all|nothing else)[\s!.]*$/.test(s))
+    return "Take care and eat well! 🥗 I'm here whenever you need a plan.";
+  return null;
+}
+
+/* ====================================================================
+   FEATURE · Toasts · Favorites · Cart · Auth · Plans · Newsletter
+   ==================================================================== */
+
+/* ---------- tiny localStorage helper ---------- */
+const store = {
+  get(k, d) { try { const v = JSON.parse(localStorage.getItem(k)); return v ?? d; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* ignore */ } },
+};
+
+/* ---------- toasts ---------- */
+const toastWrap = $('toasts');
+function toast(msg, type = 'success') {
+  const t = document.createElement('div');
+  t.className = 'toast ' + type;
+  const ico = type === 'success' ? '✓' : '!';
+  t.innerHTML = `<span class="t-ico">${ico}</span><span>${msg}</span>`;
+  toastWrap.appendChild(t);
+  requestAnimationFrame(() => requestAnimationFrame(() => t.classList.add('show')));
+  setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 350); }, 3200);
+}
+
+/* ---------- favorites (localStorage-backed; no shared state to stay TDZ-safe at first render) ---------- */
+function readFavs() { try { return new Set(JSON.parse(localStorage.getItem('nv-favs')) || []); } catch { return new Set(); } }
+function writeFavs(set) { try { localStorage.setItem('nv-favs', JSON.stringify([...set])); } catch { /* ignore */ } }
+function isFav(name) { return readFavs().has(name); }
+function toggleFav(name, btn) {
+  const set = readFavs();
+  if (set.has(name)) { set.delete(name); btn.classList.remove('active'); toast('Removed from favorites'); }
+  else { set.add(name); btn.classList.add('active'); toast('Saved to favorites ❤️'); }
+  writeFavs(set);
+}
+function bindFavs() {
+  grid.querySelectorAll('.card-fav').forEach(b => b.addEventListener('click', e => {
+    e.stopPropagation();
+    const card = b.closest('.card'); if (!card) return;
+    toggleFav(card.dataset.name, b);
+  }));
+}
+
+/* ---------- shopping cart ---------- */
+const priceNum = p => Number(String(p).replace(/[^0-9.]/g, '')) || 0;
+let cart = store.get('nv-cart', []);
+const cartDrawer = $('cart-drawer'), cartItems = $('cart-items'),
+  cartBadge = $('cart-badge'), cartTotal = $('cart-total');
+
+function saveCart() { store.set('nv-cart', cart); }
+function cartCount() { return cart.reduce((n, c) => n + c.qty, 0); }
+function addToCart(name) {
+  const prod = PRODUCTS.find(p => p.name === name); if (!prod) return;
+  const line = cart.find(c => c.name === name);
+  if (line) line.qty++; else cart.push({ name, qty: 1 });
+  saveCart(); renderCart();
+  toast(`Added <b>${esc(name)}</b> to cart 🛒`);
+}
+function changeQty(name, delta) {
+  const line = cart.find(c => c.name === name); if (!line) return;
+  line.qty += delta;
+  if (line.qty <= 0) cart = cart.filter(c => c.name !== name);
+  saveCart(); renderCart();
+}
+function renderCart() {
+  const count = cartCount();
+  cartBadge.textContent = count;
+  cartBadge.hidden = count === 0;
+  if (!cart.length) {
+    cartItems.innerHTML = `<div class="cart-empty"><span class="e">🛒</span>Your cart is empty.<br/>Add some vetted products!</div>`;
+    cartTotal.textContent = '$0';
+    return;
+  }
+  let total = 0;
+  cartItems.innerHTML = cart.map(c => {
+    const p = PRODUCTS.find(x => x.name === c.name); if (!p) return '';
+    total += priceNum(p.price) * c.qty;
+    return `<div class="cart-item" data-name="${esc(p.name)}">
+        <div class="ci-img">${p.emoji}</div>
+        <div class="ci-info"><b>${esc(p.name)}</b><span>${p.price} · ${p.cat}</span></div>
+        <div class="cart-qty">
+          <button type="button" data-act="dec" aria-label="Decrease quantity">−</button>
+          <b>${c.qty}</b>
+          <button type="button" data-act="inc" aria-label="Increase quantity">+</button>
+        </div>
+      </div>`;
+  }).join('');
+  cartTotal.textContent = '$' + total;
+}
+function openCart() { renderCart(); cartDrawer.classList.add('open'); cartDrawer.setAttribute('aria-hidden', 'false'); }
+function closeCart() { cartDrawer.classList.remove('open'); cartDrawer.setAttribute('aria-hidden', 'true'); }
+
+$('cart-btn').addEventListener('click', openCart);
+cartDrawer.addEventListener('click', e => { if (e.target.closest('[data-cart-close]')) closeCart(); });
+cartItems.addEventListener('click', e => {
+  const btn = e.target.closest('button'); if (!btn) return;
+  const name = btn.closest('.cart-item').dataset.name;
+  changeQty(name, btn.dataset.act === 'inc' ? 1 : -1);
+});
+$('cart-checkout').addEventListener('click', () => {
+  if (!cart.length) { toast('Your cart is empty', 'warn'); return; }
+  const n = cartCount();
+  cart = []; saveCart(); renderCart(); closeCart();
+  toast(`Order placed! 🎉 ${n} item${n > 1 ? 's' : ''} on the way.`);
+});
+// product "Add" buttons
+$('product-row').addEventListener('click', e => {
+  const btn = e.target.closest('.btn'); if (!btn) return;
+  addToCart(btn.closest('.product').querySelector('h3').textContent.trim());
+});
+
+/* ---------- auth (sign in / sign up, persisted) ---------- */
+let user = store.get('nv-user', null);
+const navActions = $('nav-actions'), authModal = $('auth-modal');
+let authMode = 'signin';
+
+function renderNavActions() {
+  if (user) {
+    const display = user.name || user.email.split('@')[0];
+    navActions.innerHTML = `<div class="user-chip"><span class="avatar">${esc(display[0].toUpperCase())}</span><span class="user-name">${esc(display)}</span><button class="btn btn-ghost" id="signout-btn" type="button">Sign out</button></div>`;
+    $('signout-btn').addEventListener('click', signOut);
+  } else {
+    navActions.innerHTML = `<button class="btn btn-ghost" id="signin-btn" type="button">Sign in</button><button class="btn btn-primary" id="getstarted-btn" type="button">Get started</button>`;
+    $('signin-btn').addEventListener('click', () => openAuth('signin'));
+    $('getstarted-btn').addEventListener('click', () => openAuth('signup'));
+  }
+}
+function signOut() { user = null; store.set('nv-user', null); renderNavActions(); toast('Signed out. See you soon! 👋'); }
+
+function openAuth(mode = 'signin', prefillEmail = '') {
+  authMode = mode;
+  const signup = mode === 'signup';
+  $('auth-title').textContent = signup ? 'Create your account' : 'Welcome back';
+  $('auth-sub').textContent = signup ? 'Start discovering food that fits your goals.' : 'Sign in to sync your plans and favorites.';
+  $('auth-name-field').hidden = !signup;
+  $('auth-name').required = signup;
+  $('auth-submit').textContent = signup ? 'Create account' : 'Sign in';
+  $('auth-switch-text').textContent = signup ? 'Already have an account?' : 'New to NutriVerse?';
+  $('auth-switch-btn').textContent = signup ? 'Sign in' : 'Create an account';
+  if (prefillEmail) $('auth-email').value = prefillEmail;
+  authModal.classList.add('open'); authModal.setAttribute('aria-hidden', 'false');
+  setTimeout(() => (signup ? $('auth-name') : $('auth-email')).focus(), 320);
+}
+function closeAuth() { authModal.classList.remove('open'); authModal.setAttribute('aria-hidden', 'true'); }
+
+authModal.addEventListener('click', e => { if (e.target.closest('[data-auth-close]')) closeAuth(); });
+$('auth-switch-btn').addEventListener('click', () => openAuth(authMode === 'signin' ? 'signup' : 'signin', $('auth-email').value.trim()));
+$('auth-form').addEventListener('submit', e => {
+  e.preventDefault();
+  const email = $('auth-email').value.trim(), pass = $('auth-pass').value, name = $('auth-name').value.trim();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { toast('Please enter a valid email', 'error'); return; }
+  if (pass.length < 6) { toast('Password must be at least 6 characters', 'error'); return; }
+  if (authMode === 'signup' && !name) { toast('Please enter your name', 'error'); return; }
+  user = { name: name || email.split('@')[0], email };
+  store.set('nv-user', user);
+  renderNavActions(); closeAuth();
+  e.target.reset();
+  toast(authMode === 'signup' ? `Welcome to NutriVerse, ${esc(user.name)}! 🎉` : `Welcome back, ${esc(user.name)}! 👋`);
+});
+
+/* ---------- diet plan selection ---------- */
+let selectedPlan = store.get('nv-plan', null);
+function refreshPlanButtons() {
+  document.querySelectorAll('.plan').forEach(p => {
+    const b = p.querySelector('.btn'); if (!b) return;
+    const name = p.querySelector('h3').textContent.trim();
+    b.textContent = name === selectedPlan ? 'Selected ✓' : 'Choose plan';
+  });
+}
+document.querySelectorAll('.plan .btn').forEach(btn => btn.addEventListener('click', () => {
+  selectedPlan = btn.closest('.plan').querySelector('h3').textContent.trim();
+  store.set('nv-plan', selectedPlan);
+  refreshPlanButtons();
+  toast(`“${esc(selectedPlan)}” plan selected — let's build your meals! 💪`);
+}));
+
+/* ---------- meal "Add to plan" (from the meal modal) ---------- */
+function addToPlan(name) { toast(`“${esc(name)}” added to your meal plan ✅`); }
+
+/* ---------- newsletter / "Start free" → opens sign-up prefilled ---------- */
+const ctaForm = document.querySelector('.cta-form');
+if (ctaForm) ctaForm.addEventListener('submit', e => {
+  e.preventDefault();
+  const input = ctaForm.querySelector('input'), email = input.value.trim();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { toast('Please enter a valid email', 'error'); return; }
+  input.value = '';
+  openAuth('signup', email);
+});
+
+/* ---------- footer placeholder links ---------- */
+document.querySelectorAll('.footer-grid a[href="#"]').forEach(a => a.addEventListener('click', e => {
+  e.preventDefault();
+  toast(`🚧 ${esc(a.textContent.trim())} page is coming soon!`, 'warn');
+}));
+
+/* ---------- close drawers/modals on Escape ---------- */
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeCart(); closeAuth(); } });
+
+/* ---------- initial paint of stateful UI ---------- */
+renderNavActions();
+renderCart();
+refreshPlanButtons();

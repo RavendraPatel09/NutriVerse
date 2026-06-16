@@ -44,10 +44,14 @@
       <a href="#how">How it works</a>
     </nav>
 
-    <div class="nav-actions">
-      <button class="btn btn-ghost" type="button">Sign in</button>
-      <button class="btn btn-primary" type="button">Get started</button>
+    <div class="nav-actions" id="nav-actions">
+      <button class="btn btn-ghost" id="signin-btn" type="button">Sign in</button>
+      <button class="btn btn-primary" id="getstarted-btn" type="button">Get started</button>
     </div>
+    <button class="nav-cart" id="cart-btn" type="button" aria-label="Open cart">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none"><path d="M3 4h2l2.4 12.3a2 2 0 0 0 2 1.7h7.7a2 2 0 0 0 2-1.6L21 8H6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="21" r="1.4" fill="currentColor"/><circle cx="18" cy="21" r="1.4" fill="currentColor"/></svg>
+      <span class="cart-badge" id="cart-badge" hidden>0</span>
+    </button>
     <button class="nav-burger" id="burger" aria-label="Open menu" type="button"><span></span><span></span></button>
   </header>
 
@@ -314,6 +318,50 @@
     <div class="modal-back" data-close></div>
     <div class="modal-card" id="modal-card" role="dialog" aria-label="Meal details"></div>
   </div>
+
+  <!-- CART DRAWER -->
+  <div class="drawer" id="cart-drawer" aria-hidden="true">
+    <div class="drawer-back" data-cart-close></div>
+    <aside class="drawer-card" role="dialog" aria-label="Shopping cart">
+      <header class="drawer-head">
+        <h3>Your cart</h3>
+        <button class="drawer-x" data-cart-close type="button" aria-label="Close cart">✕</button>
+      </header>
+      <div class="drawer-items" id="cart-items"></div>
+      <footer class="drawer-foot">
+        <div class="drawer-total"><span>Total</span><strong id="cart-total">$0</strong></div>
+        <button class="btn btn-primary" id="cart-checkout" type="button">Checkout</button>
+      </footer>
+    </aside>
+  </div>
+
+  <!-- AUTH MODAL -->
+  <div class="modal" id="auth-modal" aria-hidden="true">
+    <div class="modal-back" data-auth-close></div>
+    <div class="modal-card auth-card" role="dialog" aria-label="Sign in or create account">
+      <button class="modal-x" data-auth-close type="button" aria-label="Close">✕</button>
+      <div class="auth-body">
+        <span class="brand-mark auth-mark">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none"><path d="M12 21c5-3.5 8-7 8-11a5 5 0 0 0-9-3 5 5 0 0 0-9 3c0 4 3 7.5 8 11l1 .6.9-.6Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M12 7v6m-3-3h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        </span>
+        <h3 id="auth-title">Welcome back</h3>
+        <p id="auth-sub">Sign in to sync your plans and favorites.</p>
+        <form class="auth-form" id="auth-form">
+          <label class="auth-field" id="auth-name-field" hidden>Name<input type="text" id="auth-name" autocomplete="name" placeholder="Alex Rivera" /></label>
+          <label class="auth-field">Email<input type="email" id="auth-email" autocomplete="email" placeholder="you@email.com" required /></label>
+          <label class="auth-field">Password<input type="password" id="auth-pass" autocomplete="current-password" placeholder="••••••••" minlength="6" required /></label>
+          <button class="btn btn-primary" id="auth-submit" type="submit">Sign in</button>
+        </form>
+        <p class="auth-switch">
+          <span id="auth-switch-text">New to NutriVerse?</span>
+          <button type="button" id="auth-switch-btn">Create an account</button>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOASTS -->
+  <div class="toasts" id="toasts" aria-live="polite" aria-atomic="false"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
