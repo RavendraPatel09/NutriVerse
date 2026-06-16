@@ -425,7 +425,8 @@ $('ai-quick').addEventListener('click', e => {
 
 /* extra conversational replies so NutriAI always responds, not just to meals */
 function smallTalk(s) {
-  if (/^\s*(hi+|hey+|hello+|yo|hiya|hola|sup|greetings|good\s(morning|afternoon|evening))[\s!.,]*$/.test(s))
+  const FOOD = /(eat|meal|food|breakfast|lunch|dinner|snack|protein|carb|\bfat\b|calorie|macro|lose|gain|bulk|cut|muscle|vegan|keto|diet|plan|recipe|recommend|hungry|weight)/;
+  if (/^\s*(hi+|hey+|hello+|yo|hiya|hola|sup|greetings|howdy|good\s(morning|afternoon|evening))\b/.test(s) && !FOOD.test(s))
     return "Hey there! 👋 I'm <b>NutriAI</b>. Tell me a goal (lose fat, build muscle) or a meal type and I'll find the right food for you.";
   if (/(thank|thanks|thx|^ty\b|appreciate|cheers)/.test(s))
     return "You're welcome! 💚 Anything else I can help you plan?";
