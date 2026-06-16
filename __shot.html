@@ -1,0 +1,20 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><style>html,body{margin:0}iframe{width:100vw;height:100vh;border:0;display:block}</style></head>
+<body>
+<iframe id="f" src="/index.html"></iframe>
+<script>
+const mode = location.hash.slice(1) || 'cart';
+const f = document.getElementById('f');
+f.addEventListener('load', () => setTimeout(()=>{
+  const d = f.contentDocument;
+  if (mode === 'cart'){
+    d.querySelectorAll('#product-row .btn')[0].click();
+    d.querySelectorAll('#product-row .btn')[1].click();
+    d.querySelectorAll('#product-row .btn')[1].click();
+    d.getElementById('cart-btn').click();
+  } else if (mode === 'ai'){
+    d.getElementById('ai-fab').click();
+  } else if (mode === 'auth'){
+    d.getElementById('getstarted-btn').click();
+  }
+}, 1800));
+</script></body></html>
